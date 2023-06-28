@@ -1,0 +1,296 @@
+\documentclass[]{article}
+
+% Set margins
+\usepackage[margin=1in]{geometry}
+
+% Images 
+\usepackage{graphicx}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+% Reference Manipulation
+\usepackage{apacite}
+
+\title{Notes on the metodology of SCAN seq2seq paper methodology}
+\author{Domingo Edwards, Ignacio Villanueva, Lucas Gutiérrez}
+
+\begin{document}
+\maketitle
+
+\section{Dataset}
+
+\subsection{Input/Output}
+
+\paragraph{Input: $command \in C^{m_1}$}
+
+Where $m_1 \in \{1, \dots, m_{1max}\}$ is the length of the $command$ and $C$ is the vocabulary of the commands, including
+
+\begin{equation}
+    \begin{aligned}
+        C = \{and, after, twice, thrice, opposite, &                         \\
+        around, left, right, turn,                 & walk, look, run, jump\}
+    \end{aligned}
+\end{equation}
+
+So the input is a combination of words in the vocabulary of any length. $m_{1max}$ is given by the most long combination that can be produced by the gramar of SCAN generation rules.
+
+\paragraph{\textbf{Output}: $action \in A^{m_2}$}
+
+\begin{equation}
+    A = \{WALK, LOOK, RUN, JUMP, LTURN, RTURN\}
+\end{equation}
+
+\paragraph*{Examples: $s \in S \subset C^{m_1} \times A^{m_2}$\\}
+
+Where $|S| \geq 20.000$ and is stored in \texttt{tasks.txt}
+
+\begin{itemize}
+    \item $s_1$ : \textnormal{turn left twice} $\rightarrow$ LTURN LTURN
+    \item $s_2$ : \textnormal{jump opposite left and walk thrice} $\rightarrow$ LTURN LTURN JUMP WALK WALK WALK
+    \item $\dots$
+\end{itemize}
+
+\section{Tasks}
+
+\subsection{Task 1: Generalize Holdout Train/Test i.i.d}
+The first task is to generalize some $i.i.d$ data in train and test where the test has not all the combinations, formally
+
+\begin{equation}
+    \begin{aligned}
+         & train \cup test = S   \\
+         & |train| = p \cdot |S|
+    \end{aligned}
+\end{equation}
+
+Where $p \in [0, 1]$ represent the quantity of data that is added into the train set.
+
+\begin{equation}
+    train \cap test = \emptyset
+\end{equation}
+
+So the test and train share no instances $s_i$, but the train set is \textbf{representative} of $S$. So the idea is that a model can get the information of the training set and extrapolate that to the test set.
+
+In short terms
+
+\begin{enumerate}
+    \item $S$ using holdout (train/test split) $i.i.d$ representative
+    \item Train model on $train$ set
+    \item ¿Evaluate (COMO EVALUA EL OUTPUT)? model on $test$ set
+\end{enumerate}
+
+Based on the implementation where $loss$ is computed as
+
+\includegraphics{images/loss\_calculation\_implementation.png}
+
+Where \texttt{decoder\_outputs} are the sequence of actions decoded and \texttt{target\_tensor} is the correct sequence of actions in the dataset.
+
+\paragraph*{Accuracy supposition 1}
+We can \textbf{SUPOSE} that the evaluation metric is if the output given by the decoder is the output in the text or not (Binary $\{0, 1\}$ metric averaged for all instances)
+
+\paragraph*{Accuracy supposition 2}
+We can \textbf{SUPOSE} that the evaluation metric is based in each word predicted by the decoder, vs the word that the decoder should have predicted.
+
+\paragraph*{Metric 3}
+The $loss$ generated in the optimization as a metric for all the cases.
+
+\paragraph*{Files In SCAN dataset for this task\\}
+$\texttt{SCAN/simple\_split}$ contains the train test data split for this task where:
+
+
+\paragraph{$p = 0.8$}
+\begin{itemize}
+    \item \texttt{tasks\_test\_simple.txt} = train
+    \item \texttt{tasks\_test\_simple.txt} = test with $0.2$ left of $S$ as test set
+\end{itemize}
+
+\paragraph*{More $p$ splits of $S$}
+For more splits of $S$ with different values of $p$ there is \texttt{simple\_split/size\_variations} folder
+
+$p = \texttt{X}$
+\begin{itemize}
+    \item \texttt{tasks\_train\_simple\_p<X>} = train
+    \item \texttt{tasks\_test\_simple\_p<X>} = test with $(1 - p)|S|$ instances
+\end{itemize}
+
+So there are files with multiple train/test splits that gives on the test all the instances of SCAN not included in the training set.
+
+\paragraph*{objectives of this task: }
+We could see this task as a proof for generalization because the model generalize instances not seen before from $S$, but it is \textbf{NOT} a proof for \textbf{exemplar} vs \textbf{rules} based knowledge because the data belongs to the same distribution in train and test ($i.i.d$)
+
+\subsection{Task 2: Generalize long actions, Holdout Train/Test o.o.d by $length$ criteria}
+
+Here the task is that from a training set with commands that only generate small actions, the model can generalize the commands that generate long actions sequence. Formally the split is done like
+
+
+\begin{equation}
+    train = \{s_i \in S \; | \; action\_length(s_i) \leq L\} \\
+\end{equation}
+
+Where $L = 22$ and $action\_length$ is a function that gives the length $|y_i$ of the action $y_i$ (ouput) that is generated for $s_i = (x_i, y_i)$
+\begin{equation}
+    test = S \setminus train
+\end{equation}
+
+So still
+\begin{equation}
+    S = train \cup test
+\end{equation}
+
+\paragraph*{objectives of this task: }
+We could see this task as a proof for \textbf{exemplar} vs \textbf{rules} knowledge of the model, because the data that is given in the test have the \textbf{same rules} (The grammar used to generate the sequence), but has different \textbf{distribution} because the selection based on length breaks the $i.i.d$ asumption creating $o.o.d$ data.
+
+
+\subsubsection*{Notes in the result of the paper}
+
+The results of the paper where really bad so the authors provide a ways of "fixing" the given model.
+\paragraph*{Oracle for given length}: They provide an \textbf{oracle} that gives the length of the output sequence, forcing the model to generate a longer sequence even if the decoder outputs an \texttt{<EOS>} token. This improved the results only from $13.8\%$ to $23.6\%$, another went up from $20.8\%$ to $60.2\%$. The interpretation is that the problem is not \textbf{only} that the models only stops too early, based on the previous better results in the $i.i.d$ task.
+
+\paragraph*{}
+There is also a sensibility analisis in the length of the actions $L$ that makes the split of the task dataset.
+
+\subsubsection*{Files in SCAN dataset for this task}
+The train and test files are in \texttt{SCAN/length\_split/**} folder, and contains one file for train and test with $L=22$ the max number of commands in $y_i$ in train, where each line of the file is an instance $(x_i, y_i)$.
+
+
+\section{Implementation of methodology for Transformer Architecture}
+
+\subsection*{Objectives}
+\paragraph*{Rule vs Exemplar based}
+The idea of this project is to implement the same tasks described in the previous sections but for the recent \textbf{Transformer} architecture. Given the results given in \cite{chan2022transformers} the transformer architecture store \textbf{rule based} knowledge in weights, where taht information is obtained during training. So the hipotheisis of this project is that if that is true, the transformer should perform good in $o.o.d$ testing because it \textit{should} learn the semantic function that produce the outputs, unlike the models presented in the original paper.
+
+\paragraph*{Replication of previous evaluation strategy}
+Another objective is to replicate the current evaluation system given in SCAN article. But with a new transformer model.
+
+\paragraph*{Sensibility analysis of transformer architecture}
+The idea is also to give a sensibility analysis for the transformer architecture parameters and compare results in $i.i.d$ and $o.o.d$ tasks.
+
+\subsubsection*{Methodology}
+\paragraph*{only transformer:} The first idea is just implement transformer architecture for the already given SCAN datasets and measure the stast generated with different parameters.
+
+\paragraph*{With Control Model:} The second methodology is give a seq2seq LSTM model as control group for the different experiments and see if the results of the Transformer architecture are really better than architectures with memory but no attention as LSTM. (The control models could be expanded)
+
+
+\subsection{Experiment Setup}
+
+
+\subsubsection*{Preprocessing}
+The dataset is the same as before but must be treated with some preprocessing for input in the transformer architecture.
+
+\paragraph*{}
+Given an instance $s_i = (x_i, y_i) \in S$
+
+We need to \textit{preprocess} $x_i$ with te following
+
+\begin{itemize}
+    \item \texttt{x\_i = <SOS> + x\_i + <EOS>}
+\end{itemize}
+Where \texttt{<SOS>} and \texttt{<EOS>} are the start of sequence and end of sequence tokens.
+
+If after that $|x_i| \leq $ \texttt{CONTEXT\_LENGTH} we need to apply padding with the \texttt{<PAD>} token. Here the context length parameter is the maximum context accepted by the transformer encoder.
+
+\paragraph*{example: \texttt{jump twice}}
+
+Assuming CONTEXT\_LENGTH as 10 we need to generate
+
+\begin{center}
+    \texttt{(<SOS>, jump, twice, <EOS>, <PAD>, <PAD>, <PAD>, <PAD>, <PAD>, <PAD>)}
+\end{center}
+
+So our new vocabulary of commands is $C^* = C \cup \{\texttt{<SOS>}, \texttt{<EOS>}, \texttt{<PAD>}\}$
+
+\paragraph*{}
+For the output we do the same as before, but apply no padding, in the same example as before we have
+
+\begin{center}
+    \texttt{JUMP JUMP}
+\end{center}
+
+and the preprocessing should be
+
+\begin{center}
+    \texttt{(<SOS>, JUMP, JUMP, <EOS>)}
+\end{center}
+
+This give us again a new vocabulary $A^* = A \cup \{\texttt{<SOS>}, \texttt{<EOS>}\}$ for the output
+
+\paragraph*{}
+We said that $S_{processed} \subset C^* \times A^*$ is the new preprocessed space four our instances $s_i$. Formally we have
+
+\begin{equation}
+    Preprocessor: S \rightarrow S_{preprocessed}
+\end{equation}
+
+*A inverse preprocessor can be coded as well to see the sequences of results without the added tokens.
+
+\subsubsection*{Tokenization}
+The tokenization simply takes the preprocessed input $(x_i, y_i) \in S_{processed}$ and applies a function $f_{x_i}: C^* \rightarrow \mathbb{N}$ and $f_{y_i}: A^* \rightarrow \mathbb{N}$. In simple words maps from the vocabulary to a different number as token for each word in the vocabulary. Formally our tokenizer maps
+
+\begin{equation}
+    Tokenizer: S_{processed} \rightarrow S_{tokenized}
+\end{equation}
+
+*A detokenizer can be coded as well to see the sequences of results.
+
+\subsection*{Training}
+\paragraph*{}
+During training the transformer receives an instance $s_i = (x_i, y_i) \in S_{tokenized}$, the $x_i$ is passed to the transformer encoder input, producing an internal representation as output. Formally
+
+
+\begin{equation}
+    Encoder(x_i) = encoding
+\end{equation}
+
+\paragraph*{}
+After encoding the \texttt{<SOS>} is passed to the decoder as first input, the $encoding$ generated by the input is passed to. Formally
+
+\begin{equation}
+    Decoder(encoding, \texttt{<SOS>}) = output_i
+\end{equation}
+
+Is passed first. We then generate until an $<EOS>$ is generated. The algorithm is as follwos
+
+\paragraph*{Input: $s_i = (x_i, y_i) \in S_{token}$}
+\begin{enumerate}
+    \item \texttt{final\_ouput = <SOS>}
+    \item \texttt{encoding = Encoding(x\_i)}
+    \item \texttt{output\_i = Decoder(encoding, final\_output)}
+    \item \texttt{if output\_i is <EOS> return}
+    \item \texttt{final\_output += output\_i}, go to 3
+\end{enumerate}
+
+\subsection*{Loss Function}
+The above algorithm gives an output that predicts the sequence of commands and can be tested against $y_i$ vs $y_{pred} = final\_output$, computing a loss function for model optimization.
+
+\paragraph*{Loss metric} Cross entropy of the ground trouth $y_i$ vs $y_{pred}$ the final output generated by the decoder.
+
+\paragraph*{Note*:} Here the strategy of "teacher forcing" presented in the original paper is not used, because the model is not recurrent.
+
+
+\subsection*{Optimization}
+
+Use a standard optimizer like ADAM or ADAMW, (the most used in transformer architectures).
+
+\subsection*{Evaluation}
+The evaluation will be the $accuracy$ of the model counting the number of well written sequences of commands like
+
+\begin{equation}
+    score(y_{i}, y_{pred}) =
+    \begin{cases}
+        1 & \quad \textnormal{ if } y_i = y_{pred}      \\
+        0 & \quad \textnormal{ if } y_i \not = y_{pred} \\
+    \end{cases}
+\end{equation}
+
+And the accuracy is computed as the average of all the correct prediction in the test set.
+
+\begin{equation}
+    \frac{\sum_{i = 1}^{n = |S_{test}|}score(y_i, y_{pred})}{|S_{test}|}
+\end{equation}
+
+This metric is used for the sensibility analysis and also for the optional control model.
+
+\bibliographystyle{apacite}
+\bibliography{references.bib}
+\end{document}
