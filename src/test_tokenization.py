@@ -26,39 +26,43 @@ class TestInputTokenizer:
     <PAD>: 15
     """
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_each_word_of_vocablary(self):
-        # Setup
-        path = os.path.join("SCAN", "simple_split", "tasks_train_simple.txt")
-        dataset = SCANDataset(path=path)
-        input_tokenizer = InputTokenizer(data=dataset)
+        input_tokenizer = InputTokenizer()
 
         vocabulary = [
-            "after",
-            "twice",
-            "thrice",
-            "opposite",
-            "around",
-            "left",
-            "right",
-            "turn",
-            "walk",
-            "look",
-            "run",
-            "jump",
-            "<SOS>",
-            "<EOS>",
-            "<PAD>",
+            "after",  # 0
+            "twice",  # 1
+            "thrice",  # 2
+            "opposite",  # 3
+            "around",  # 4
+            "left",  # 5
+            "right",  # 6
+            "turn",  # 7
+            "walk",  # 8
+            "look",  # 9
+            "run",  # 10
+            "jump",  # 11
+            "<SOS>",  # 12
+            "<EOS>",  # 13
+            "<PAD>",  # 14
         ]
 
-        for word, i in enumerate(vocabulary):
-            input_tokenizer.encode()
-            input = [word]
-            assert input_tokenizer.encode(input) == i
+        for i, word in enumerate(vocabulary):
+            input = word
+            encoding = input_tokenizer.encode(input)
+            assert encoding == [i]
 
-    # def test_some_input_cases(self):
-    #     x_i = ["<SOS>", "jump", "left", "<EOS>"]
+    def test_some_input_cases(self):
+        input_tokenizer = InputTokenizer()
 
-    #     tokenized_x_i = tokenize_input(x_i)
+        x_i = "<SOS> jump left <EOS>"
 
-    #     assert tokenized_x_i == (13, 12, 6, 14)
+        tokenized_x_i = input_tokenizer.encode(x_i)
+
+        assert tokenized_x_i == [12, 11, 5, 13]
+
+        x_i = "<SOS> turn opposite right <EOS> <PAD> <PAD>"
+
+        tokenized_x_i = input_tokenizer.encode(x_i)
+
+        assert tokenized_x_i == [12, 7, 3, 6, 13, 14, 14]
