@@ -201,7 +201,7 @@ Assuming CONTEXT\_LENGTH as 10 we need to generate
 So our new vocabulary of commands is $C^* = C \cup \{\texttt{<SOS>}, \texttt{<EOS>}, \texttt{<PAD>}\}$
 
 \paragraph*{}
-For the output we do the same as before, but apply no padding, in the same example as before we have
+For the output we do the same as before, in the same example as before we have
 
 \begin{center}
     \texttt{JUMP JUMP}
@@ -210,10 +210,10 @@ For the output we do the same as before, but apply no padding, in the same examp
 and the preprocessing should be
 
 \begin{center}
-    \texttt{(<SOS>, JUMP, JUMP, <EOS>)}
+    \texttt{(<SOS>, JUMP, JUMP, <EOS>, <PAD>, <PAD>, <PAD>, <PAD>, <PAD>, <PAD>)}
 \end{center}
 
-This give us again a new vocabulary $A^* = A \cup \{\texttt{<SOS>}, \texttt{<EOS>}\}$ for the output
+This give us again a new vocabulary $A^* = A \cup \{\texttt{<SOS>}, \texttt{<EOS>}, \texttt{<PAD>}\}$ for the output
 
 \paragraph*{}
 We said that $S_{processed} \subset C^* \times A^*$ is the new preprocessed space four our instances $s_i$. Formally we have
@@ -249,14 +249,14 @@ After encoding the \texttt{<SOS>} is passed to the decoder as first input, the $
     Decoder(encoding, \texttt{<SOS>}) = output_i
 \end{equation}
 
-Is passed first. We then generate until an $<EOS>$ is generated. The algorithm is as follwos
+Is passed first. We then generate until an \texttt{<EOS>} is generated. The algorithm is as follwos
 
 \paragraph*{Input: $s_i = (x_i, y_i) \in S_{token}$}
 \begin{enumerate}
     \item \texttt{final\_ouput = <SOS>}
     \item \texttt{encoding = Encoding(x\_i)}
     \item \texttt{output\_i = Decoder(encoding, final\_output)}
-    \item \texttt{if output\_i is <EOS> return}
+    \item \texttt{if output\_i is <EOS>, add <PAD> to fill context and return(final\_output)}
     \item \texttt{final\_output += output\_i}, go to 3
 \end{enumerate}
 
