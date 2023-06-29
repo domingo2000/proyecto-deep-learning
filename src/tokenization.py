@@ -1,0 +1,2 @@
+class InputTokenizer:
+    pass

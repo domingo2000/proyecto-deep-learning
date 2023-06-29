@@ -1,18 +1,19 @@
-def _base_transform(input: str, context=None, padding=False):
-    transform = ["<SOS>"]
-    transform.extend(input.split(" "))
+class Preprocessor:
+    def __init__(self, context):
+        if not context:
+            raise NameError("Context was not given in initialization")
 
-    if padding:
-        while len(transform) < (context - 1):
+        self.context = context
+
+    def transform(self, input):
+        transform = ["<SOS>"]
+        transform.extend(input.split(" "))
+
+        transform.append("<EOS>")
+
+        while len(transform) < (self.context):
             transform.append("<PAD>")
 
-    transform.append("<EOS>")
-    return transform
-
-
-def input_transform(input: str, context=10):
-    return _base_transform(input, context=context, padding=True)
-
-
-def output_transform(input: str):
-    return _base_transform(input)
+        transform = transform[0 : self.context]
+        transform = " ".join(transform)
+        return transform

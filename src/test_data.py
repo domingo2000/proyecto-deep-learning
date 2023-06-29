@@ -1,5 +1,6 @@
 from data import SCANDataset
 from torch.utils.data import DataLoader
+from preprocessing import Preprocessor
 import pytest
 import os
 
@@ -23,7 +24,7 @@ class TestDataset:
         assert dataset[-1] == s_last
         assert len(dataset) == 16_728
 
-    def test_dataset_2(self):
+    def test_dataset_test(self):
         path = os.path.join("SCAN", "simple_split", "tasks_test_simple.txt")
         dataset = SCANDataset(path=path)
 
@@ -74,3 +75,34 @@ class TestDataset:
         assert len(test_x) == 32
         assert test_x[0] == s1_test[0]
         assert test_y[0] == s1_test[1]
+
+    def test_dataset_with_transform(self):
+        """
+        Context = 15
+        """
+        path = os.path.join("SCAN", "simple_split", "tasks_train_simple.txt")
+
+        preprocessor = Preprocessor(context=15)
+        dataset = SCANDataset(
+            path=path,
+            transform=lambda x: preprocessor.transform(x),
+            target_transform=lambda y: preprocessor.transform(y),
+        )
+
+        s1 = (
+            "<SOS> jump opposite right twice and turn opposite right thrice <EOS> <PAD> <PAD> <PAD> <PAD>",
+            "<SOS> I_TURN_RIGHT I_TURN_RIGHT I_JUMP I_TURN_RIGHT I_TURN_RIGHT I_JUMP I_TURN_RIGHT I_TURN_RIGHT I_TURN_RIGHT I_TURN_RIGHT I_TURN_RIGHT I_TURN_RIGHT <EOS> <PAD>",
+        )
+
+        assert dataset[0] == s1
+
+        # Now test dataloader works correctly
+        BATCH_SIZE = 32
+
+        dataloader = DataLoader(dataset, batch_size=BATCH_SIZE)
+
+        x, y = next(iter(dataloader))
+
+        assert len(x) == BATCH_SIZE
+        assert x[0] == s1[0]
+        assert y[0] == s1[1]

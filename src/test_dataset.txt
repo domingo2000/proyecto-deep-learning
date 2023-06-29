@@ -1,0 +1,3 @@
+IN: walk and turn left OUT: I_WALK I_TURN_LEFT
+IN: look after turn right OUT: I_TURN_RIGHT I_LOOK
+IN: turn left and turn left OUT: I_TURN_LEFT I_TURN_LEFT

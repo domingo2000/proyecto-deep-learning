@@ -1,50 +1,61 @@
-from preprocessing import input_transform, output_transform
+from preprocessing import Preprocessor
 
 
-class TestInputTransform:
-    def test_input_transform(self):
+class TestPreprocessor:
+    def test_transform_no_padding(self):
         """
         Add <SOS> and <EOS>
         """
-        x_i = "jump jump"
-        transformed_x_i = input_transform(x_i, context=4)
-        assert transformed_x_i == ["<SOS>", "jump", "jump", "<EOS>"]
+        preprocessor = Preprocessor(context=4)
 
-    def test_input_transform_with_padding(self):
+        x_i = "jump jump"
+        transformed_x_i = preprocessor.transform(x_i)
+
+        assert transformed_x_i == "<SOS> jump jump <EOS>"
+
+    def test_exceeded_context_crops_input(self):
+        preprocessor = Preprocessor(context=4)
+
+        x_i = "jump jump jump jump jump jump"
+        transformed_x_i = preprocessor.transform(x_i)
+
+        assert transformed_x_i == "<SOS> jump jump jump"
+
+    def test_transform_with_padding(self):
         """
         Applies padding: <PAD>  accordingly when the context is longer
         """
+        preprocessor = Preprocessor(context=10)
         x_i = "jump jump"
-        transformed_x_i = input_transform(x_i, context=10)
+        transformed_x_i = preprocessor.transform(x_i)
 
-        assert len(transformed_x_i) == 10
-        assert transformed_x_i == [
-            "<SOS>",
-            "jump",
-            "jump",
-            "<PAD>",
-            "<PAD>",
-            "<PAD>",
-            "<PAD>",
-            "<PAD>",
-            "<PAD>",
-            "<EOS>",
-        ]
+        assert len(transformed_x_i.split(" ")) == 10
+        assert (
+            transformed_x_i
+            == "<SOS> jump jump <EOS> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD>"
+        )
 
-
-class TestOutputTransform:
     def test_output_transform(self):
         """
         Add <SOS> and <EOS>
         """
-        x_i = "I_TURN_RIGHT I_TURN_RIGHT"
-        transformed_x_i = output_transform(x_i)
-        assert transformed_x_i == ["<SOS>", "I_TURN_RIGHT", "I_TURN_RIGHT", "<EOS>"]
+        preprocessor = Preprocessor(context=4)
 
-    def test_output_transform(self):
+        y_i = "I_TURN_RIGHT I_TURN_RIGHT"
+        transformed_y_i = preprocessor.transform(y_i)
+        assert transformed_y_i == "<SOS> I_TURN_RIGHT I_TURN_RIGHT <EOS>"
+
+    def test_output_transform_padding(self):
         """
         Adds no padding when the context is longer
         """
+        preprocessor = Preprocessor(context=10)
+
         y_i = "I_TURN_RIGHT I_TURN_RIGHT"
-        transformed_y_i = output_transform(y_i)
-        assert "<PAD>" not in transformed_y_i
+        transformed_y_i = preprocessor.transform(y_i)
+
+        assert len(transformed_y_i.split(" ")) == 10
+        assert (
+            transformed_y_i
+            == "<SOS> I_TURN_RIGHT I_TURN_RIGHT <EOS> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD>"
+        )
