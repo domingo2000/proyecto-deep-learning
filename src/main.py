@@ -8,12 +8,15 @@ from torch.utils.data import DataLoader
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam, SGD
 
+from sklearn.metrics import accuracy_score
+
 import os
 
 import parameters as P
 
 # Use GPU if available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+torch.manual_seed(0)
 
 # Preprocessing
 preprocessor = Preprocessor(context=P.CONTEXT_LENGTH)
@@ -23,8 +26,8 @@ input_tokenizer = InputTokenizer()
 output_tokenizer = OutputTokenizer()
 
 # Dataset
-# train_path = os.path.join("SCAN", "simple_split", "tasks_train_simple.txt")
 train_path = os.path.join("src", "tasks_toy.txt")
+# train_path = os.path.join("SCAN", "simple_split", "tasks_train_simple.txt")
 train_dataset = SCANDataset(
     path=train_path,
     transform=lambda x: torch.tensor(
@@ -40,13 +43,9 @@ train_dataset = SCANDataset(
 
 
 # Dataloaders
-train_dataloader = DataLoader(train_dataset, batch_size=P.BATCH_SIZE)
+train_dataloader = DataLoader(train_dataset, batch_size=P.BATCH_SIZE, shuffle=True)
 
 x, y, y_label = next(iter(train_dataloader))
-
-print("")
-print(x)
-print(y)
 
 # Model
 model = TransformerModel()
@@ -96,6 +95,27 @@ def generate(x_i):
     return target_sequence
 
 
+def evaluate():
+    model.eval()
+    y_pred = []
+    y_true = []
+    for batch in train_dataloader:
+        x, y, y_label = batch
+        x = x.to(device)
+        y = y.to(device)
+        y_label = y_label.to(device)
+        output = [generate(x_i).tolist() for x_i in x]
+        y_pred.extend(output)
+        y_true.extend(y.tolist())
+        break
+
+    y_pred = [output_tokenizer.decode(d) for d in y_pred]
+    y_true = [output_tokenizer.decode(d) for d in y_true]
+    acc = accuracy_score(y_true, y_pred)
+    print(f"acc: {acc}")
+    model.train()
+
+
 for epoch in range(P.EPOCHS):
     epoch_loss = 0
     for batch_n, batch in enumerate(train_dataloader):
@@ -119,7 +139,7 @@ for epoch in range(P.EPOCHS):
         epoch_loss += loss.item()
 
         # if batch_n % 10 == 0:
-        #     print(f"| batch: {batch_n} | loss: {loss:.2f} |")
+        #     print(f"| batch: {batch_n:3d} | loss: {loss:.2f} |")
 
     if epoch % 100 == 0:
         print(f"| epoch: {epoch} | loss: {epoch_loss:.2f} |")
@@ -129,6 +149,7 @@ for epoch in range(P.EPOCHS):
 
         y_test = torch.multinomial(logits, num_samples=1)
         y_test = y_test.squeeze()
+        y_test = generate(x_test)
         print(
             f"IN: {tokenization_sequence_to_string(x_test, tokenizer=input_tokenizer)}: OUT_PRED: {tokenization_sequence_to_string(y_test, tokenizer=output_tokenizer)}"
         )
@@ -141,22 +162,10 @@ for epoch in range(P.EPOCHS):
         )
 
         # Jump twice Generated
-
-        # Without generation, passing all the input as training set
-        print(f"| epoch: {epoch} | loss: {epoch_loss:.2f} |")
-        x_test = train_dataset.transform("jump twice").to(device)
-        x_target = train_dataset.target_transform("I_JUMP I_JUMP").to(device)
-        logits = model(x_test, x_target)
-
-        y_test = torch.multinomial(logits, num_samples=1)
-        y_test = y_test.squeeze()
-        print(
-            f"IN: {tokenization_sequence_to_string(x_test, tokenizer=input_tokenizer)}: OUT_PRED: {tokenization_sequence_to_string(y_test, tokenizer=output_tokenizer)}"
-        )
-
-        # With generation, passing only <SOS>
         x_test = train_dataset.transform("jump twice").to(device)
         y_test = generate(x_test)
         print(
             f"IN: {tokenization_sequence_to_string(x_test, tokenizer=input_tokenizer)}: OUT_PRED: {tokenization_sequence_to_string(y_test, tokenizer=output_tokenizer)}"
         )
+
+        evaluate()
