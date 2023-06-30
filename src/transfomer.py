@@ -22,6 +22,7 @@ class TransformerModel(nn.Module):
             num_decoder_layers=P.N_DECODER_LAYERS,
             d_model=P.D_MODEL,
             batch_first=True,  # (BATCH, SEQUENCE_LENGTH, FEATURE_DIM)
+            dropout=P.DROPOUT,
         )
 
         # Boolean mask for masked self attention on decoder

@@ -8,7 +8,10 @@ from torch.utils.data import DataLoader
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam, SGD
 
+from torch.utils.tensorboard import SummaryWriter
+
 from sklearn.metrics import accuracy_score
+
 
 import os
 
@@ -17,6 +20,9 @@ import parameters as P
 # Use GPU if available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(0)
+
+# Tensorboard for visualization of training
+writer = SummaryWriter()
 
 # Preprocessing
 preprocessor = Preprocessor(context=P.CONTEXT_LENGTH)
@@ -114,6 +120,7 @@ def evaluate():
     acc = accuracy_score(y_true, y_pred)
     print(f"acc: {acc}")
     model.train()
+    return acc
 
 
 for epoch in range(P.EPOCHS):
@@ -133,7 +140,9 @@ for epoch in range(P.EPOCHS):
         loss = criterion(logits, y_label)
 
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
+        torch.nn.utils.clip_grad_norm_(
+            model.parameters(), 0.5
+        )  # Clipping to avoid exploding gradients
         optimizer.step()
 
         epoch_loss += loss.item()
@@ -141,8 +150,8 @@ for epoch in range(P.EPOCHS):
         # if batch_n % 10 == 0:
         #     print(f"| batch: {batch_n:3d} | loss: {loss:.2f} |")
 
+    epoch_loss = epoch_loss / P.BATCH_SIZE
     if epoch % 100 == 0:
-        print(f"| epoch: {epoch} | loss: {epoch_loss:.2f} |")
         x_test = train_dataset.transform("jump").to(device)
         x_target = train_dataset.target_transform("I_JUMP").to(device)
         logits = model(x_test, x_target)
@@ -161,11 +170,22 @@ for epoch in range(P.EPOCHS):
             f"IN: {tokenization_sequence_to_string(x_test, tokenizer=input_tokenizer)}: OUT_PRED: {tokenization_sequence_to_string(y_test, tokenizer=output_tokenizer)}"
         )
 
-        # Jump twice Generated
-        x_test = train_dataset.transform("jump twice").to(device)
+        # run Generated
+        x_test = train_dataset.transform("run").to(device)
         y_test = generate(x_test)
         print(
             f"IN: {tokenization_sequence_to_string(x_test, tokenizer=input_tokenizer)}: OUT_PRED: {tokenization_sequence_to_string(y_test, tokenizer=output_tokenizer)}"
         )
 
-        evaluate()
+        # walk and run Generated
+        x_test = train_dataset.transform("walk and run").to(device)
+        y_test = generate(x_test)
+        print(
+            f"IN: {tokenization_sequence_to_string(x_test, tokenizer=input_tokenizer)}: OUT_PRED: {tokenization_sequence_to_string(y_test, tokenizer=output_tokenizer)}"
+        )
+
+        accuracy = evaluate()
+
+        print(f"| epoch: {epoch} | loss: {epoch_loss:.2f} | acc = {accuracy:.2f}")
+        writer.add_scalar("Loss/train", epoch_loss, epoch)
+        writer.add_scalar("Accuracy/train", accuracy, epoch)

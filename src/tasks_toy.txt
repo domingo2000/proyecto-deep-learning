@@ -1,96 +1,93 @@
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN
 IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
-IN: jump OUT: I_JUMP
-IN: jump twice OUT: I_JUMP I_JUMP
+IN: run OUT: I_RUN
+IN: walk and run OUT: I_WALK I_RUN

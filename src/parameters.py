@@ -10,12 +10,13 @@ BATCH_SIZE = 32
 ## Model Parameters ##
 ######################
 
-D_MODEL = 32  # 512  # Original from Attention is All You need paper describe the dimension of the embeddings (input, output, positional)
+D_MODEL = 20  # 512  # Original from Attention is All You need paper describe the dimension of the embeddings (input, output, positional)
 N_HEADS = 2
 N_ENCODER_LAYERS = 2
 N_DECODER_LAYERS = 2
+DROPOUT = 0.1
 # MAX sequence of commands OR actions are 479 so 512 is enough for the task
-CONTEXT_LENGTH = 10
+CONTEXT_LENGTH = 100
 
 
 ###################################
