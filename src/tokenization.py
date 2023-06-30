@@ -1,3 +1,6 @@
+from parameters import INPUT_VOCABULARY, OUTPUT_VOCABULARY
+
+
 class Tokenizer:
     def __init__(self, vocabulary):
         self.vocabulary = vocabulary
@@ -17,23 +20,7 @@ class Tokenizer:
 
 class InputTokenizer:
     def __init__(self):
-        self.vocabulary = [
-            "after",
-            "twice",
-            "thrice",
-            "opposite",
-            "around",
-            "left",
-            "right",
-            "turn",
-            "walk",
-            "look",
-            "run",
-            "jump",
-            "<SOS>",
-            "<EOS>",
-            "<PAD>",
-        ]
+        self.vocabulary = INPUT_VOCABULARY
 
         self._tokenizer = Tokenizer(vocabulary=self.vocabulary)
 
@@ -46,18 +33,7 @@ class InputTokenizer:
 
 class OutputTokenizer:
     def __init__(self):
-        self.vocabulary = [
-            "WALK",
-            "LOOK",
-            "RUN",
-            "JUMP",
-            "LTURN",
-            "RTURN",
-            "<SOS>",
-            "<EOS>",
-            "<PAD>",
-        ]
-
+        self.vocabulary = OUTPUT_VOCABULARY
         self._tokenizer = Tokenizer(vocabulary=self.vocabulary)
 
     def encode(self, input):

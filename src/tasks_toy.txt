@@ -1,0 +1,86 @@
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump OUT: I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP
+IN: jump twice OUT: I_JUMP I_JUMP

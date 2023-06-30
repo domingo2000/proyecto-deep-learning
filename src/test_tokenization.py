@@ -86,12 +86,12 @@ class TestOutputTokenizer:
         output_tokenizer = OutputTokenizer()
 
         vocabulary = [
-            "WALK",  # 0
-            "LOOK",  # 1
-            "RUN",  # 2
-            "JUMP",  # 3
-            "LTURN",  # 4
-            "RTURN",  # 5
+            "I_WALK",  # 0
+            "I_LOOK",  # 1
+            "I_RUN",  # 2
+            "I_JUMP",  # 3
+            "I_TURN_LEFT",  # 4
+            "I_TURN_RIGHT",  # 5
             "<SOS>",  # 6
             "<EOS>",  # 7
             "<PAD>",  # 8
