@@ -2,7 +2,7 @@
 ## Training Parameters ##
 #########################
 
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 1e-4
 EPOCHS = 200_000
 BATCH_SIZE = 32
 

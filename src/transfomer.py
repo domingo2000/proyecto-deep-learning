@@ -24,6 +24,7 @@ class TransformerModel(nn.Module):
             batch_first=True,  # (BATCH, SEQUENCE_LENGTH, FEATURE_DIM)
         )
 
+        # Boolean mask for masked self attention on decoder
         self.mask = nn.Transformer.generate_square_subsequent_mask(
             sz=P.CONTEXT_LENGTH, device=device
         )
@@ -41,6 +42,13 @@ class TransformerModel(nn.Module):
         self.linear_feed_forward.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, src, tgt):
+        # Create mask for all the padding in the ouput
+        output_pad_token = 8
+        tgt_key_padding_mask = tgt == output_pad_token
+
+        input_pad_token = 15
+        src_key_padding_mask = src == input_pad_token
+
         src_embedding = self.input_embedding(src)
         src_pos_embedding = self.input_position_embedding(src)
         src = src_embedding + src_pos_embedding
@@ -48,7 +56,13 @@ class TransformerModel(nn.Module):
         tgt_pos_embedding = self.target_position_embedding(tgt)
         tgt = tgt_embedding + tgt_pos_embedding
 
-        output = self.transformer(src, tgt, tgt_mask=self.mask)
+        output = self.transformer(
+            src,
+            tgt,
+            tgt_mask=self.mask,
+            src_key_padding_mask=src_key_padding_mask,
+            tgt_key_padding_mask=tgt_key_padding_mask,
+        )
         output = self.linear_feed_forward(output)
         output = self.softmax(output)
 
