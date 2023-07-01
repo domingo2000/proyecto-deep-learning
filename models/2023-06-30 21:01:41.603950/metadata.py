@@ -1,3 +1,6 @@
+#### Note ###
+# This model was trained using <EOS> in input
+
 #########################
 ## Training Parameters ##
 #########################
