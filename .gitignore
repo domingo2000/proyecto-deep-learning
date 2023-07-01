@@ -468,3 +468,6 @@ TSWLatexianTemp*
 
 ## Temp files
 temp.py
+
+# Tensorboard Runs
+runs/**

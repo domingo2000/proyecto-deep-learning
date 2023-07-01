@@ -1,4 +1,5 @@
 from tokenization import InputTokenizer, OutputTokenizer
+from parameters import INPUT_VOCABULARY, OUTPUT_VOCABULARY
 from data import SCANDataset
 import os
 import pytest
@@ -29,23 +30,7 @@ class TestInputTokenizer:
     def test_each_word_of_vocablary(self):
         input_tokenizer = InputTokenizer()
 
-        vocabulary = [
-            "after",  # 0
-            "twice",  # 1
-            "thrice",  # 2
-            "opposite",  # 3
-            "around",  # 4
-            "left",  # 5
-            "right",  # 6
-            "turn",  # 7
-            "walk",  # 8
-            "look",  # 9
-            "run",  # 10
-            "jump",  # 11
-            "<SOS>",  # 12
-            "<EOS>",  # 13
-            "<PAD>",  # 14
-        ]
+        vocabulary = INPUT_VOCABULARY
 
         for i, word in enumerate(vocabulary):
             input = word
@@ -59,13 +44,13 @@ class TestInputTokenizer:
 
         tokenized_x_i = input_tokenizer.encode(x_i)
 
-        assert tokenized_x_i == [12, 11, 5, 13]
+        assert tokenized_x_i == [13, 12, 6, 14]
 
         x_i = "<SOS> turn opposite right <EOS> <PAD> <PAD>"
 
         tokenized_x_i = input_tokenizer.encode(x_i)
 
-        assert tokenized_x_i == [12, 7, 3, 6, 13, 14, 14]
+        assert tokenized_x_i == [13, 8, 4, 7, 14, 15, 15]
 
 
 class TestOutputTokenizer:
@@ -85,17 +70,7 @@ class TestOutputTokenizer:
     def test_each_word_of_vocablary(self):
         output_tokenizer = OutputTokenizer()
 
-        vocabulary = [
-            "I_WALK",  # 0
-            "I_LOOK",  # 1
-            "I_RUN",  # 2
-            "I_JUMP",  # 3
-            "I_TURN_LEFT",  # 4
-            "I_TURN_RIGHT",  # 5
-            "<SOS>",  # 6
-            "<EOS>",  # 7
-            "<PAD>",  # 8
-        ]
+        vocabulary = OUTPUT_VOCABULARY
 
         for i, word in enumerate(vocabulary):
             input = word
@@ -105,13 +80,12 @@ class TestOutputTokenizer:
     def test_some_input_cases(self):
         output_tokenizer = OutputTokenizer()
 
-        x_i = "<SOS> WALK RUN <EOS>"
-
+        x_i = "<SOS> I_WALK I_RUN <EOS>"
         tokenized_x_i = output_tokenizer.encode(x_i)
 
         assert tokenized_x_i == [6, 0, 2, 7]
 
-        x_i = "<SOS> RTURN WALK JUMP <EOS> <PAD> <PAD>"
+        x_i = "<SOS> I_TURN_RIGHT I_WALK I_JUMP <EOS> <PAD> <PAD>"
 
         tokenized_x_i = output_tokenizer.encode(x_i)
 

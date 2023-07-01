@@ -7,7 +7,7 @@ LEARNING_RATE = 1e-5
 EPOCHS = 120
 EPOCH_N_METRICS = 1
 BATCH_LOGGING_N = 100
-GRADIENT_CLIPPING = 0.5
+GRADIENT_CLIPPING = None
 
 ######################
 ## Model Parameters ##

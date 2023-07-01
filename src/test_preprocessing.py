@@ -1,4 +1,4 @@
-from preprocessing import Preprocessor
+from preprocessing import Preprocessor, NoPadPreprocessor
 
 
 class TestPreprocessor:
@@ -42,32 +42,33 @@ class TestPreprocessor:
         preprocessor = Preprocessor(context=4)
 
         y_i = "I_TURN_RIGHT I_TURN_RIGHT"
-        transformed_y_i = preprocessor.output_transform(y_i)
+        transformed_y_i = preprocessor.output_transform(y_i, sos=True, eos=True)
         assert transformed_y_i == "<SOS> I_TURN_RIGHT I_TURN_RIGHT <EOS>"
 
-    def test_output_transform_padding(self):
+
+class TestNoPadPreprocessor:
+    def test_no_pad_preprocessor(self):
         """
         Adds no padding when the context is longer
         """
-        preprocessor = Preprocessor(context=10)
+        preprocessor = NoPadPreprocessor()
 
+        x_i = "jump jump"
         y_i = "I_TURN_RIGHT I_TURN_RIGHT"
-        transformed_y_i = preprocessor.output_transform(y_i)
+        transformed_y_i = preprocessor.transform(y_i, sos=True, eos=True)
 
-        assert len(transformed_y_i.split(" ")) == 10
-        assert (
-            transformed_y_i
-            == "<SOS> I_TURN_RIGHT I_TURN_RIGHT <EOS> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD>"
-        )
+        assert transformed_y_i == "<SOS> I_TURN_RIGHT I_TURN_RIGHT <EOS>"
 
-    def test_output_transform_empty_sequence(self):
-        preprocessor = Preprocessor(context=10)
+        transformed_y_i = preprocessor.transform(y_i, sos=False, eos=True)
+        transformed_x_i = preprocessor.transform(x_i, sos=False, eos=True)
 
-        y_i = ""
-        transformed_y_i = preprocessor.output_transform(y_i, eos=False)
+        assert transformed_y_i == "I_TURN_RIGHT I_TURN_RIGHT <EOS>"
+        assert transformed_x_i == "jump jump <EOS>"
 
-        assert len(transformed_y_i.split(" ")) == 10
-        assert (
-            transformed_y_i
-            == "<SOS> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD>"
-        )
+        transformed_y_i = preprocessor.transform(y_i, sos=False, eos=False)
+
+        assert transformed_y_i == "I_TURN_RIGHT I_TURN_RIGHT"
+
+        transformed_y_i = preprocessor.transform(y_i, sos=True, eos=True, shift=True)
+
+        assert transformed_y_i == "I_TURN_RIGHT I_TURN_RIGHT <EOS> <PAD>"

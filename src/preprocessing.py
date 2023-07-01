@@ -47,3 +47,27 @@ class Preprocessor:
         transform = transform[0 : self.context]
         transform = " ".join(transform)
         return transform
+
+
+class NoPadPreprocessor:
+    def __init__(self):
+        pass
+
+    def transform(self, input, sos=False, eos=False, shift=False):
+        transform = []
+
+        if sos:
+            transform.append("<SOS>")
+
+        if input != "":
+            transform.extend(input.split(" "))
+
+        if eos:
+            transform.append("<EOS>")
+
+        if shift:
+            transform = transform[1:]
+            transform.append("<PAD>")
+
+        transform = " ".join(transform)
+        return transform

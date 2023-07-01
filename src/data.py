@@ -27,6 +27,7 @@ class SCANDataset(Dataset):
         instance = self.instances[idx]
         x_i = instance[0]
         y_i = instance[1]
+        y_label = y_i
         if self.label_transform:
             y_label = self.label_transform(y_i)
         if self.transform:

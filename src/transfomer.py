@@ -6,7 +6,6 @@ from tokenization import OutputTokenizer
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-# based on https://torchtutorialstaging.z5.web.core.windows.net/beginner/transformer_tutorial.html
 class TransformerModel(nn.Module):
     def __init__(self):
         super(TransformerModel, self).__init__()
@@ -21,6 +20,7 @@ class TransformerModel(nn.Module):
             num_encoder_layers=P.N_ENCODER_LAYERS,
             num_decoder_layers=P.N_DECODER_LAYERS,
             d_model=P.D_MODEL,
+            dim_feedforward=P.D_FEED_FORWARD,
             batch_first=True,  # (BATCH, SEQUENCE_LENGTH, FEATURE_DIM)
             dropout=P.DROPOUT,
         )
@@ -42,6 +42,12 @@ class TransformerModel(nn.Module):
         self.linear_feed_forward.bias.data.zero_()
         self.linear_feed_forward.weight.data.uniform_(-initrange, initrange)
 
+    def get_attention_mask(self, tgt):
+        mask = nn.Transformer.generate_square_subsequent_mask(
+            sz=tgt.shape[0], device=device
+        )
+        return mask
+
     def forward(self, src, tgt):
         # Create mask for all the padding in the ouput
         output_pad_token = 8
@@ -60,7 +66,7 @@ class TransformerModel(nn.Module):
         output = self.transformer(
             src,
             tgt,
-            tgt_mask=self.mask,
+            tgt_mask=self.get_attention_mask(tgt),
             src_key_padding_mask=src_key_padding_mask,
             tgt_key_padding_mask=tgt_key_padding_mask,
         )
@@ -71,10 +77,16 @@ class TransformerModel(nn.Module):
 
 
 if __name__ == "__main__":
+    from data import SCANDataset
+    from tokenization import InputTokenizer, OutputTokenizer
+    from preprocessing import Preprocessor
+
     model = TransformerModel()
 
-    src = torch.randint(0, P.INPUT_VOCAB_SIZE, size=(P.BATCH_SIZE, P.CONTEXT_LENGTH))
-    tgt = torch.randint(0, P.OUTPUT_VOCAB_SIZE, size=(P.BATCH_SIZE, P.CONTEXT_LENGTH))
+    BATCH_SIZE = 32
+
+    src = torch.randint(0, P.INPUT_VOCAB_SIZE, size=(BATCH_SIZE, P.CONTEXT_LENGTH))
+    tgt = torch.randint(0, P.OUTPUT_VOCAB_SIZE, size=(BATCH_SIZE, P.CONTEXT_LENGTH))
     out = model(src, tgt)
     print(out)
 
