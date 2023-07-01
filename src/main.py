@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from transfomer import TransformerModel, generate
+from transfomer import TransformerModel
 from data import SCANDataset
 from tokenization import InputTokenizer, OutputTokenizer
-from preprocessing import Preprocessor, NoPadPreprocessor
+from preprocessing import Preprocessor
 
 import torch
 from torch.utils.data import DataLoader, RandomSampler
@@ -31,26 +31,27 @@ writer = SummaryWriter()
 timestamp = str(datetime.now())
 
 # Preprocessing
-preprocessor = NoPadPreprocessor()
+input_preprocessor = Preprocessor(eos=True)
+output_preprocesor = Preprocessor(sos=True, eos=True)
 
 # Tokenization
 input_tokenizer = InputTokenizer()
 output_tokenizer = OutputTokenizer()
+
+#
 
 # Dataset
 train_path = os.path.join(*P.DATSET_PATH)
 train_dataset = SCANDataset(
     path=train_path,
     transform=lambda x: torch.tensor(
-        input_tokenizer.encode(preprocessor.transform(x, eos=True)),
+        input_tokenizer.encode(input_preprocessor.transform(x)),
     ),
     target_transform=lambda x: torch.tensor(
-        output_tokenizer.encode(preprocessor.transform(x, sos=True, eos=True))
+        output_tokenizer.encode(output_preprocesor.transform(x))
     ),
     label_transform=lambda x: torch.tensor(
-        output_tokenizer.encode(
-            preprocessor.transform(x, sos=True, eos=True, shift=True)
-        )
+        output_tokenizer.encode(output_preprocesor.transform(x, shift=True))
     ),
 )
 
@@ -88,8 +89,8 @@ def tokenization_sequence_to_string(tokenized_sequence, tokenizer=input_tokenize
 # Generator Function
 def generate(x_i):
     eos_token = output_tokenizer.encode("<EOS>")[0]
-
-    output = output_tokenizer.encode(preprocessor.transform("", sos=True, eos=False))
+    preprocessor = Preprocessor(sos=True)
+    output = output_tokenizer.encode(preprocessor.transform(""))
     current_target_idx = 0
     while eos_token not in output:
         target_sequence = torch.tensor(

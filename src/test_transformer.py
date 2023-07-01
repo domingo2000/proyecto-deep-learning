@@ -1,7 +1,7 @@
 import pytest
 from transfomer import TransformerModel
 from tokenization import InputTokenizer, OutputTokenizer
-from preprocessing import NoPadPreprocessor
+from preprocessing import Preprocessor
 import torch
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -9,7 +9,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class TestTransformer:
     def test_transformer_no_batch(self):
-        preprocesor = NoPadPreprocessor()
+        preprocesor = Preprocessor()
         input_tokenizer = InputTokenizer()
         output_tokenizer = OutputTokenizer()
 
@@ -41,7 +41,7 @@ class TestTransformer:
 
     @pytest.mark.skip(reason="batch inputs can't have different sequnce length")
     def test_transformer_batch(self):
-        preprocesor = NoPadPreprocessor()
+        preprocesor = Preprocessor()
         input_tokenizer = InputTokenizer()
         output_tokenizer = OutputTokenizer()
 

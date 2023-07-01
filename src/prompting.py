@@ -2,7 +2,7 @@ import gradio as gr
 
 import torch
 from transfomer import TransformerModel
-from preprocessing import NoPadPreprocessor
+from preprocessing import Preprocessor
 from tokenization import InputTokenizer, OutputTokenizer
 import parameters as P
 
@@ -13,7 +13,7 @@ model = TransformerModel()
 model.load_state_dict(weights)
 model.to(device=device)
 
-preprocessor = NoPadPreprocessor()
+preprocessor = Preprocessor()
 input_tokenizer = InputTokenizer()
 output_tokenizer = OutputTokenizer()
 

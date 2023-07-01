@@ -1,69 +1,24 @@
 class Preprocessor:
-    def __init__(self, context):
-        if not context:
-            raise NameError("Context was not given in initialization")
-
+    def __init__(self, context=None, pad=False, sos=False, eos=False):
         self.context = context
+        self.pad = pad
+        self.sos = sos
+        self.eos = eos
 
-    def transform(self, input):
-        transform = ["<SOS>"]
-        transform.extend(input.split(" "))
-
-        transform.append("<EOS>")
-
-        while len(transform) < (self.context):
-            transform.append("<PAD>")
-
-        transform = transform[0 : self.context]
-        transform = " ".join(transform)
-        return transform
-
-    def input_transform(self, input):
-        transform = []
-        transform.extend(input.split(" "))
-
-        while len(transform) < (self.context):
-            transform.append("<PAD>")
-
-        transform = transform[0 : self.context]
-        transform = " ".join(transform)
-        return transform
-
-    def output_transform(self, input, sos=False, eos=True):
+    def transform(self, input, shift=False):
         transform = []
 
-        if sos:
+        if self.sos:
             transform.append("<SOS>")
 
-        if input != "":
-            transform.extend(input.split(" "))
+        transform.extend(input.split())
 
-        if eos:
+        if self.eos:
             transform.append("<EOS>")
 
-        while len(transform) < (self.context):
-            transform.append("<PAD>")
-
-        transform = transform[0 : self.context]
-        transform = " ".join(transform)
-        return transform
-
-
-class NoPadPreprocessor:
-    def __init__(self):
-        pass
-
-    def transform(self, input, sos=False, eos=False, shift=False):
-        transform = []
-
-        if sos:
-            transform.append("<SOS>")
-
-        if input != "":
-            transform.extend(input.split(" "))
-
-        if eos:
-            transform.append("<EOS>")
+        if self.pad and self.context:
+            while len(transform) < (self.context):
+                transform.append("<PAD>")
 
         if shift:
             transform = transform[1:]
