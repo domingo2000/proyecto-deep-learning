@@ -1,4 +1,4 @@
-from tokenization import Tokenizer
+from tokenization.tokenization import Tokenizer
 from parameters import INPUT_VOCABULARY, OUTPUT_VOCABULARY
 
 

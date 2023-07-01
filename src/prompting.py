@@ -1,9 +1,9 @@
 import gradio as gr
 
 import torch
-from transfomer import TransformerModel
-from preprocessing import Preprocessor
-from tokenization import InputTokenizer, OutputTokenizer
+from transformer.transfomer import TransformerModel
+from preprocessing.preprocessing import Preprocessor
+from tokenization.tokenization import InputTokenizer, OutputTokenizer
 import parameters as P
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

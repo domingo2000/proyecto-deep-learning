@@ -78,3 +78,25 @@ class TransformerModel(nn.Module):
         output = self.softmax(output)
 
         return output
+
+    def generate(self, x_i, sos_token, eos_token):
+        device = x_i.device
+        output = [sos_token]
+        current_target_idx = 0
+        while eos_token not in output:
+            target_sequence = torch.tensor(
+                output,
+                device=device,
+            )
+            y_pred_logits = self.forward(x_i, target_sequence)
+            y_pred = torch.multinomial(y_pred_logits, num_samples=1)
+
+            next_token = y_pred[current_target_idx].item()
+            current_target_idx += 1
+
+            if current_target_idx >= P.MAX_LENGTH:
+                break
+
+            output.append(next_token)
+
+        return output

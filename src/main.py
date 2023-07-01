@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from transfomer import TransformerModel
-from data import SCANDataset
-from tokenization import Tokenizer
-from preprocessing import Preprocessor
+from transformer.transfomer import TransformerModel
+from dataset.data import SCANDataset
+from tokenization.tokenization import Tokenizer
+from preprocessing.preprocessing import Preprocessor
 
 import torch
 from torch.utils.data import DataLoader
@@ -40,6 +40,8 @@ output_preprocesor = Preprocessor(sos=True, eos=True)
 # Tokenization
 input_tokenizer = Tokenizer(P.INPUT_VOCABULARY)
 output_tokenizer = Tokenizer(P.OUTPUT_VOCABULARY)
+sos_token = output_tokenizer.encode("<SOS>")[0]
+eos_token = output_tokenizer.encode("<EOS>")[0]
 
 # Dataset
 train_path = os.path.join(*P.DATSET_PATH)
@@ -91,31 +93,6 @@ def tokenization_sequence_to_string(tokenized_sequence, tokenizer=input_tokenize
     return output
 
 
-# Generator Function
-def generate(x_i):
-    eos_token = output_tokenizer.encode("<EOS>")[0]
-    preprocessor = Preprocessor(sos=True)
-    output = output_tokenizer.encode(preprocessor.transform(""))
-    current_target_idx = 0
-    while eos_token not in output:
-        target_sequence = torch.tensor(
-            output,
-            device=device,
-        )
-        y_pred_logits = model.forward(x_i, target_sequence)
-        y_pred = torch.multinomial(y_pred_logits, num_samples=1)
-
-        next_token = y_pred[current_target_idx].item()
-        current_target_idx += 1
-
-        if current_target_idx >= P.MAX_LENGTH:
-            break
-
-        output.append(next_token)
-
-    return output
-
-
 def evaluate():
     model.eval()
     y_pred = []
@@ -126,7 +103,7 @@ def evaluate():
         x_i = x_i.to(device)
         y_i = y_i.to(device)
         y_label_i = y_label_i.to(device)
-        output = generate(x_i)
+        output = model.generate(x_i, sos_token, eos_token)
         y_pred.append(output)
         y_true.append(y_i.tolist())
 
@@ -195,28 +172,28 @@ for epoch in range(P.EPOCHS):
 
         y_test = torch.multinomial(logits, num_samples=1)
         y_test = y_test.squeeze()
-        y_test = generate(x_test)
+        y_test = model.generate(x_test, sos_token, eos_token)
         print(
             f"IN: {tokenization_sequence_to_string(x_test.tolist(), tokenizer=input_tokenizer)}: OUT_PRED: {tokenization_sequence_to_string(y_test, tokenizer=output_tokenizer)}"
         )
 
         # Jump Generated
         x_test = train_dataset.transform("jump").to(device)
-        y_test = generate(x_test)
+        y_test = model.generate(x_test, sos_token, eos_token)
         print(
             f"IN: {tokenization_sequence_to_string(x_test.tolist(), tokenizer=input_tokenizer)}: OUT_PRED: {tokenization_sequence_to_string(y_test, tokenizer=output_tokenizer)}"
         )
 
         # run Generated
         x_test = train_dataset.transform("run").to(device)
-        y_test = generate(x_test)
+        y_test = model.generate(x_test, sos_token, eos_token)
         print(
             f"IN: {tokenization_sequence_to_string(x_test.tolist(), tokenizer=input_tokenizer)}: OUT_PRED: {tokenization_sequence_to_string(y_test, tokenizer=output_tokenizer)}"
         )
 
         # walk and run Generated
         x_test = train_dataset.transform("walk and run").to(device)
-        y_test = generate(x_test)
+        y_test = model.generate(x_test, sos_token, eos_token)
         print(
             f"IN: {tokenization_sequence_to_string(x_test.tolist(), tokenizer=input_tokenizer)}: OUT_PRED: {tokenization_sequence_to_string(y_test, tokenizer=output_tokenizer)}"
         )

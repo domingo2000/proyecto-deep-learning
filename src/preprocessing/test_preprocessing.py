@@ -1,4 +1,4 @@
-from preprocessing import Preprocessor
+from preprocessing.preprocessing import Preprocessor
 
 
 class TestPreprocessor:
