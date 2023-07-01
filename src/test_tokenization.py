@@ -1,11 +1,8 @@
-from tokenization import InputTokenizer, OutputTokenizer
+from tokenization import Tokenizer
 from parameters import INPUT_VOCABULARY, OUTPUT_VOCABULARY
-from data import SCANDataset
-import os
-import pytest
 
 
-class TestInputTokenizer:
+class TestTokenizer:
     """
     The tokenization should be
 
@@ -27,8 +24,8 @@ class TestInputTokenizer:
     <PAD>: 15
     """
 
-    def test_each_word_of_vocablary(self):
-        input_tokenizer = InputTokenizer()
+    def test_each_word_of_input_vocablary(self):
+        input_tokenizer = Tokenizer(vocabulary=INPUT_VOCABULARY)
 
         vocabulary = INPUT_VOCABULARY
 
@@ -38,7 +35,7 @@ class TestInputTokenizer:
             assert encoding == [i]
 
     def test_some_input_cases(self):
-        input_tokenizer = InputTokenizer()
+        input_tokenizer = Tokenizer(vocabulary=INPUT_VOCABULARY)
 
         x_i = "<SOS> jump left <EOS>"
 
@@ -52,23 +49,8 @@ class TestInputTokenizer:
 
         assert tokenized_x_i == [13, 8, 4, 7, 14, 15, 15]
 
-
-class TestOutputTokenizer:
-    """
-    The tokenization should be
-    WALK: 0
-    LOOK: 1
-    RUN:  2
-    JUMP: 3
-    LTURN: 4
-    RTURN: 5
-    <SOS>: 6
-    <EOS>: 7
-    <PAD>: 8
-    """
-
-    def test_each_word_of_vocablary(self):
-        output_tokenizer = OutputTokenizer()
+    def test_each_word_of_output_vocablary(self):
+        output_tokenizer = Tokenizer(vocabulary=OUTPUT_VOCABULARY)
 
         vocabulary = OUTPUT_VOCABULARY
 
@@ -77,8 +59,8 @@ class TestOutputTokenizer:
             encoding = output_tokenizer.encode(input)
             assert encoding == [i]
 
-    def test_some_input_cases(self):
-        output_tokenizer = OutputTokenizer()
+    def test_some_output_cases(self):
+        output_tokenizer = Tokenizer(vocabulary=OUTPUT_VOCABULARY)
 
         x_i = "<SOS> I_WALK I_RUN <EOS>"
         tokenized_x_i = output_tokenizer.encode(x_i)

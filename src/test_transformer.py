@@ -1,83 +1,48 @@
 import pytest
 from transfomer import TransformerModel
-from tokenization import InputTokenizer, OutputTokenizer
+from tokenization import Tokenizer
 from preprocessing import Preprocessor
 import torch
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+# Setup
+src_size = 10
+tgt_size = 10
+dim_hidden = 64
+n_heads = 4
+num_encoder_layers = 2
+num_decoder_layers = 2
+dropout = 0.5
+dim_feed_forward = 256
+
+model = TransformerModel(
+    src_size,
+    tgt_size,
+    dim_hidden,
+    n_heads,
+    num_encoder_layers,
+    num_decoder_layers,
+    dim_feed_forward,
+    dropout,
+)
+
 
 class TestTransformer:
     def test_transformer_no_batch(self):
-        preprocesor = Preprocessor()
-        input_tokenizer = InputTokenizer()
-        output_tokenizer = OutputTokenizer()
+        src = torch.randint(0, src_size, (1, 10))[0]
+        tgt = torch.randint(0, src_size, (1, 10))[0]
 
-        model = TransformerModel()
+        logits = model(src, tgt)
 
-        input = "jump twice"
-        output = "I_JUMP I_JUMP"
+        assert logits.shape == (10, tgt_size)
 
-        x_i = preprocesor.transform(input)
-        y_i = preprocesor.transform(output, sos=True, eos=True)
-        y_label = preprocesor.transform(output, sos=True, eos=True, shift=True)
-
-        x_i = input_tokenizer.encode(x_i)
-        y_i = output_tokenizer.encode(y_i)
-        y_label = output_tokenizer.encode(y_label)
-
-        x_i = torch.tensor(x_i)
-        y_i = torch.tensor(y_i)
-        y_label = torch.tensor(y_label)
-
-        model.to(device=device)
-        x_i = x_i.to(device)
-        y_i = y_i.to(device)
-        y_label = y_label.to(device)
-
-        logits = model.forward(x_i, y_i)
-
-        assert logits.shape == (4, 9)  # 4 predictions, vocab size = 9
-
-    @pytest.mark.skip(reason="batch inputs can't have different sequnce length")
     def test_transformer_batch(self):
-        preprocesor = Preprocessor()
-        input_tokenizer = InputTokenizer()
-        output_tokenizer = OutputTokenizer()
+        batch_size = 32
+        sequence_length = 5
+        src = torch.randint(0, src_size, (batch_size, sequence_length))
+        tgt = torch.randint(0, src_size, (batch_size, sequence_length))
 
-        model = TransformerModel()
+        logits = model.forward(src, tgt)
 
-        input_batch = ["jump twice", "jump"]
-        output_batch = ["I_JUMP I_JUMP", "I_JUMP"]
-
-        x_1 = torch.tensor(
-            [
-                input_tokenizer.encode(preprocesor.transform(input))
-                for input in input_batch
-            ],
-            device=device,
-        )
-        y_1 = torch.tensor(
-            [
-                output_tokenizer.encode(
-                    preprocesor.transform(output, sos=True, eos=True)
-                )
-                for output in output_batch
-            ],
-            device=device,
-        )
-        y_label_1 = torch.tensor(
-            [
-                output_tokenizer.encode(
-                    preprocesor.transform(output, sos=True, eos=True, shift=True)
-                )
-                for output in output_batch
-            ],
-            device=device,
-        )
-
-        model.to(device=device)
-
-        logits = model.forward(x_1, y_1)
-
-        print(logits)
+        assert logits.shape == (batch_size, sequence_length, src_size)

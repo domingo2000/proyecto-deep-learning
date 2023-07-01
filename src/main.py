@@ -2,11 +2,11 @@ from datetime import datetime
 
 from transfomer import TransformerModel
 from data import SCANDataset
-from tokenization import InputTokenizer, OutputTokenizer
+from tokenization import Tokenizer
 from preprocessing import Preprocessor
 
 import torch
-from torch.utils.data import DataLoader, RandomSampler
+from torch.utils.data import DataLoader
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam, SGD
 
@@ -22,11 +22,14 @@ import parameters as P
 
 # Use GPU if available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+# Set seeds for reproducibility
 torch.manual_seed(0)
 random.seed(0)
 
 # Tensorboard for visualization of training
 writer = SummaryWriter()
+
 # Create timestamp for run name
 timestamp = str(datetime.now())
 
@@ -35,10 +38,8 @@ input_preprocessor = Preprocessor(eos=True)
 output_preprocesor = Preprocessor(sos=True, eos=True)
 
 # Tokenization
-input_tokenizer = InputTokenizer()
-output_tokenizer = OutputTokenizer()
-
-#
+input_tokenizer = Tokenizer(P.INPUT_VOCABULARY)
+output_tokenizer = Tokenizer(P.OUTPUT_VOCABULARY)
 
 # Dataset
 train_path = os.path.join(*P.DATSET_PATH)
@@ -62,7 +63,16 @@ train_dataloader = DataLoader(train_dataset, batch_size=1, shuffle=True)
 x, y, y_label = next(iter(train_dataloader))
 
 # Model
-model = TransformerModel()
+model = TransformerModel(
+    src_size=P.INPUT_VOCAB_SIZE,
+    tgt_size=P.OUTPUT_VOCAB_SIZE,
+    dim_hidden=P.D_MODEL,
+    n_heads=P.N_HEADS,
+    num_encoder_layers=P.N_ENCODER_LAYERS,
+    num_decoder_layers=P.N_DECODER_LAYERS,
+    dim_feed_forward=P.D_FEED_FORWARD,
+    dropout=P.DROPOUT if P.DROPOUT else 0.0,
+)
 
 # Optimizer
 optimizer = Adam(model.parameters(), lr=P.LEARNING_RATE)
@@ -78,11 +88,6 @@ model.to(device=device)
 
 def tokenization_sequence_to_string(tokenized_sequence, tokenizer=input_tokenizer):
     output = tokenizer.decode(tokenized_sequence)
-    # output = output.replace(" <PAD>", "")
-    # output = output.replace("<SOS> ", "")
-    # output = output.replace("<SOS>", "")
-    # output = output.replace(" <EOS>", "")
-    # output = output.replace("<EOS>", "")
     return output
 
 

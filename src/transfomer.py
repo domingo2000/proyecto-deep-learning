@@ -1,36 +1,38 @@
 import torch
 import torch.nn as nn
 import parameters as P
-from tokenization import OutputTokenizer
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class TransformerModel(nn.Module):
-    def __init__(self):
+    def __init__(
+        self,
+        src_size,
+        tgt_size,
+        dim_hidden,
+        n_heads,
+        num_encoder_layers,
+        num_decoder_layers,
+        dim_feed_forward,
+        dropout=0.0,
+    ):
         super(TransformerModel, self).__init__()
-        self.input_embedding = nn.Embedding(P.INPUT_VOCAB_SIZE, P.D_MODEL)
-        self.output_embedding = nn.Embedding(P.OUTPUT_VOCAB_SIZE, P.D_MODEL)
+        self.input_embedding = nn.Embedding(src_size, dim_hidden)
+        self.output_embedding = nn.Embedding(tgt_size, dim_hidden)
 
-        self.input_position_embedding = nn.Embedding(P.INPUT_VOCAB_SIZE, P.D_MODEL)
-        self.target_position_embedding = nn.Embedding(P.OUTPUT_VOCAB_SIZE, P.D_MODEL)
+        self.input_position_embedding = nn.Embedding(src_size, dim_hidden)
+        self.target_position_embedding = nn.Embedding(tgt_size, dim_hidden)
 
         self.transformer = nn.Transformer(
-            nhead=P.N_HEADS,
-            num_encoder_layers=P.N_ENCODER_LAYERS,
-            num_decoder_layers=P.N_DECODER_LAYERS,
-            d_model=P.D_MODEL,
-            dim_feedforward=P.D_FEED_FORWARD,
-            batch_first=True,  # (BATCH, SEQUENCE_LENGTH, FEATURE_DIM)
-            dropout=P.DROPOUT,
+            nhead=n_heads,
+            num_encoder_layers=num_encoder_layers,
+            num_decoder_layers=num_decoder_layers,
+            d_model=dim_hidden,
+            dim_feedforward=dim_feed_forward,
+            dropout=dropout,
+            batch_first=True,
         )
 
-        # Boolean mask for masked self attention on decoder
-        self.mask = nn.Transformer.generate_square_subsequent_mask(
-            sz=P.CONTEXT_LENGTH, device=device
-        )
-
-        self.linear_feed_forward = nn.Linear(P.D_MODEL, P.OUTPUT_VOCAB_SIZE)
+        self.linear_feed_forward = nn.Linear(dim_hidden, tgt_size)
         self.softmax = nn.Softmax(dim=-1)
 
         self.init_weights()
@@ -43,8 +45,10 @@ class TransformerModel(nn.Module):
         self.linear_feed_forward.weight.data.uniform_(-initrange, initrange)
 
     def get_attention_mask(self, tgt):
+        if len(tgt.shape) == 3:
+            tgt = tgt[0]
         mask = nn.Transformer.generate_square_subsequent_mask(
-            sz=tgt.shape[0], device=device
+            sz=tgt.shape[0], device=tgt.device
         )
         return mask
 
@@ -74,29 +78,3 @@ class TransformerModel(nn.Module):
         output = self.softmax(output)
 
         return output
-
-
-if __name__ == "__main__":
-    from data import SCANDataset
-    from tokenization import InputTokenizer, OutputTokenizer
-    from preprocessing import Preprocessor
-
-    model = TransformerModel()
-
-    BATCH_SIZE = 32
-
-    src = torch.randint(0, P.INPUT_VOCAB_SIZE, size=(BATCH_SIZE, P.CONTEXT_LENGTH))
-    tgt = torch.randint(0, P.OUTPUT_VOCAB_SIZE, size=(BATCH_SIZE, P.CONTEXT_LENGTH))
-    out = model(src, tgt)
-    print(out)
-
-    criterion = nn.CrossEntropyLoss()
-
-    # Evaluate the model
-    # B, T, C = batch size, sequence length, output_vocabulary_size
-    B, T, C = out.shape
-    out = out.view(B * T, C)
-    tgt = tgt.view(B * T)
-    loss = criterion(out, tgt)
-
-    print(loss)
