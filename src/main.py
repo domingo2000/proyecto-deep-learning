@@ -4,6 +4,7 @@ from transformer.transfomer import TransformerModel
 from dataset.data import SCANDataset
 from tokenization.tokenization import Tokenizer
 from preprocessing.preprocessing import Preprocessor
+from evaluation.evaluation import Evaluator
 
 import torch
 from torch.utils.data import DataLoader
@@ -48,13 +49,14 @@ train_path = os.path.join(*P.DATSET_PATH)
 train_dataset = SCANDataset(
     path=train_path,
     transform=lambda x: torch.tensor(
-        input_tokenizer.encode(input_preprocessor.transform(x)),
+        input_tokenizer.encode(input_preprocessor.transform(x)), device=device
     ),
     target_transform=lambda x: torch.tensor(
-        output_tokenizer.encode(output_preprocesor.transform(x))
+        output_tokenizer.encode(output_preprocesor.transform(x)), device=device
     ),
     label_transform=lambda x: torch.tensor(
-        output_tokenizer.encode(output_preprocesor.transform(x, shift=True))
+        output_tokenizer.encode(output_preprocesor.transform(x, shift=True)),
+        device=device,
     ),
 )
 
@@ -82,6 +84,8 @@ optimizer = Adam(model.parameters(), lr=P.LEARNING_RATE)
 # Loss Criterion
 criterion = CrossEntropyLoss()
 
+# Evaluation
+evaluation = Evaluator(output_tokenizer, 32)
 
 # Train
 model.train()
@@ -91,27 +95,6 @@ model.to(device=device)
 def tokenization_sequence_to_string(tokenized_sequence, tokenizer=input_tokenizer):
     output = tokenizer.decode(tokenized_sequence)
     return output
-
-
-def evaluate():
-    model.eval()
-    y_pred = []
-    y_true = []
-    sample = random.sample(list(iter(train_dataset)), k=32)
-    for s_i in sample:
-        x_i, y_i, y_label_i = s_i
-        x_i = x_i.to(device)
-        y_i = y_i.to(device)
-        y_label_i = y_label_i.to(device)
-        output = model.generate(x_i, sos_token, eos_token)
-        y_pred.append(output)
-        y_true.append(y_i.tolist())
-
-    y_pred = [output_tokenizer.decode(d) for d in y_pred]
-    y_true = [output_tokenizer.decode(d) for d in y_true]
-    acc = accuracy_score(y_true, y_pred)
-    model.train()
-    return acc
 
 
 def save_model(model, timestamp, epoch):
@@ -198,7 +181,7 @@ for epoch in range(P.EPOCHS):
             f"IN: {tokenization_sequence_to_string(x_test.tolist(), tokenizer=input_tokenizer)}: OUT_PRED: {tokenization_sequence_to_string(y_test, tokenizer=output_tokenizer)}"
         )
 
-        accuracy = evaluate()
+        accuracy = evaluation.evaluate(model, train_dataset)
 
         # Save model
         save_model(model, timestamp, epoch)
