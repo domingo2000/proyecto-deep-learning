@@ -3,50 +3,40 @@ import gradio as gr
 import torch
 from transformer.transfomer import TransformerModel
 from preprocessing.preprocessing import Preprocessor
-from tokenization.tokenization import InputTokenizer, OutputTokenizer
+from tokenization.tokenization import Tokenizer
 import parameters as P
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 weights = torch.load("models/2023-06-30 17:41:14.024773/model-47.pt")
-model = TransformerModel()
+
+model = TransformerModel(
+    src_size=P.INPUT_VOCAB_SIZE,
+    tgt_size=P.OUTPUT_VOCAB_SIZE,
+    dim_hidden=128,
+    n_heads=2,
+    num_encoder_layers=2,
+    num_decoder_layers=2,
+    dim_feed_forward=256,
+    dropout=0.0,
+)
+
 model.load_state_dict(weights)
 model.to(device=device)
 
-preprocessor = Preprocessor()
-input_tokenizer = InputTokenizer()
-output_tokenizer = OutputTokenizer()
-
-
-def generate(x_i):
-    eos_token = output_tokenizer.encode("<EOS>")[0]
-
-    output = output_tokenizer.encode(preprocessor.transform("", sos=True, eos=False))
-    current_target_idx = 0
-    while eos_token not in output:
-        target_sequence = torch.tensor(
-            output,
-            device=device,
-        )
-        y_pred_logits = model.forward(x_i, target_sequence)
-        y_pred = torch.multinomial(y_pred_logits, num_samples=1)
-
-        next_token = y_pred[current_target_idx].item()
-        current_target_idx += 1
-
-        if current_target_idx >= P.MAX_LENGTH:
-            break
-
-        output.append(next_token)
-
-    return output
+input_preprocessor = Preprocessor(eos=True)
+input_tokenizer = Tokenizer(P.INPUT_VOCABULARY)
+output_tokenizer = Tokenizer(P.OUTPUT_VOCABULARY)
+sos_token = output_tokenizer.encode("<SOS>")[0]
+eos_token = output_tokenizer.encode("<EOS>")[0]
 
 
 def inference(command):
     x_i = torch.tensor(
-        input_tokenizer.encode(preprocessor.transform(command, eos=True)), device=device
+        input_tokenizer.encode(input_preprocessor.transform(command)),
+        device=device,
     )
-    output = generate(x_i)
+    output = model.generate(x_i, sos_token, eos_token)
     output = output_tokenizer.decode(output)
     return output
 
