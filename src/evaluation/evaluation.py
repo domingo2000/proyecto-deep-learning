@@ -23,7 +23,8 @@ class Evaluator:
         y_true = []
 
         if self._is_sampled:
-            sample = random.sample(list(iter(dataset)), k=self.sample_k)
+            k = len(dataset) if self.sample_k > len(dataset) else self.sample_k
+            sample = random.sample(list(iter(dataset)), k=k)
         else:
             sample = dataset
 
