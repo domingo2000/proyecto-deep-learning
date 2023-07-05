@@ -19,7 +19,7 @@ stop = {  # number of epochs (it should include both ends)
 
 config_control = {
     "learning_rate": tune.grid_search([1e-5]),  # [1e-5, 1e-4, 1e-3]
-    "d_model": tune.grid_search([16]),  # [16, 32, 64] ; Add 128?
+    "d_model": tune.grid_search([64]),  # [16, 32, 64] ; Add 128?
     "n_heads": tune.grid_search([2]),  # [1, 2, 4]
     "dropout": tune.grid_search([0.0]),  # [0.0, 0.3] ; Add 0.5?
     "gradient_clipping": tune.grid_search([0.5]),  # [0, 0.5]
