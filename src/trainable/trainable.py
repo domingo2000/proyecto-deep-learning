@@ -20,7 +20,6 @@ class TrainTransformer(tune.Trainable):
     # Sets up the model as an independent, parallelizable process
     def setup(self, config):
         # config (dict): A dict of hyperparameters
-        self.x = 0
         self.gradient_clipping = config["gradient_clipping"]
 
         # # Set seeds for reproducibility
