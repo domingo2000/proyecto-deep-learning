@@ -16,43 +16,22 @@ from dataset.data import SCANDataset
 from preprocessing.preprocessing import Preprocessor
 from tokenization.tokenization import Tokenizer
 from transformer.transfomer import TransformerModel
+from evaluation.evaluation import Evaluator
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def evaluate(model, dataset, sos_token, eos_token, output_tokenizer):
-    model.eval()
-    y_pred = []
-    y_true = []
-    for s_i in dataset:
-        x_i, y_i, y_label_i = s_i
-        x_i = x_i.to(device)
-        y_i = y_i.to(device)
-        y_label_i = y_label_i.to(device)
-        output = model.generate(x_i, sos_token, eos_token)
-        y_pred.append(output)
-        y_true.append(y_i.tolist())
-
-    y_pred = [output_tokenizer.decode(d) for d in y_pred]
-    y_true = [output_tokenizer.decode(d) for d in y_true]
-    acc = accuracy_score(y_true, y_pred)
-    model.train()
-    return acc
-
-
-@pytest.mark.skip(reason="Integration test takes more time (20s aprox)")
+# @pytest.mark.skip(reason="Integration test takes more time (20s aprox)")
 def test_integration():
     # Setup
-    path = os.path.join("data", "tasks_toy.txt")
 
     input_preprocessor = Preprocessor(eos=True)
     output_preprocessor = Preprocessor(sos=True, eos=True)
 
     input_tokenizer = Tokenizer(vocabulary=INPUT_VOCABULARY)
     output_tokenizer = Tokenizer(vocabulary=OUTPUT_VOCABULARY)
-    sos_token = output_tokenizer.encode("<SOS>")[0]
-    eos_token = output_tokenizer.encode("<EOS>")[0]
 
+    path = os.path.join("data", "tasks_toy.txt")
     dataset = SCANDataset(
         path=path,
         transform=lambda src: torch.tensor(
@@ -72,7 +51,7 @@ def test_integration():
     model = TransformerModel(
         src_size=INPUT_VOCAB_SIZE,
         tgt_size=OUTPUT_VOCAB_SIZE,
-        dim_hidden=128,
+        d_model=128,
         n_heads=4,
         num_encoder_layers=2,
         num_decoder_layers=2,
@@ -85,6 +64,8 @@ def test_integration():
     optimizer = Adam(model.parameters(), lr=1e-5)
 
     criterion = CrossEntropyLoss()
+
+    evaluator = Evaluator(output_tokenizer)
 
     epochs = 5
     for epoch in range(epochs):
@@ -106,5 +87,5 @@ def test_integration():
             optimizer.step()
 
     # Evaluate
-    accuracy = evaluate(model, dataset, sos_token, eos_token, output_tokenizer)
+    accuracy = evaluator.evaluate(model, dataset)
     assert accuracy >= 0.95
