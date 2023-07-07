@@ -9,13 +9,13 @@ import parameters as P
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 weights = torch.load(
-    "runs/grid_search/TrainTransformer_d4eeb_00001_1_d_model=16,dropout=0.0000,exp_type=toy,gradient_clipping=0.5000,learning_rate=0.0001,n_heads=2,posi_2023-07-05_11-15-52/checkpoint_000010/model.pth"
+    "runs/iid/original/sensibility/learning_rate/TrainTransformer_66060_00001_1_d_model=64,dropout=0.0000,exp_type=iid,gradient_clipping=0.5000,learning_rate=0.0000,n_heads=2,posi_2023-07-05_16-20-35/checkpoint_000020/model.pth"
 )
 
 model = TransformerModel(
     src_size=P.INPUT_VOCAB_SIZE,
     tgt_size=P.OUTPUT_VOCAB_SIZE,
-    d_model=16,
+    d_model=64,
     n_heads=2,
     num_encoder_layers=2,
     num_decoder_layers=2,
