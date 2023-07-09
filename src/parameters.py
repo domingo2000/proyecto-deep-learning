@@ -12,10 +12,11 @@ DATSET_PATH = ["SCAN", "simple_split", "tasks_train_simple.txt"]
 # DATSET_PATH = ["data", "tasks_toy.txt"]
 
 LEARNING_RATE = 1e-5
-EPOCHS = 120
+EPOCHS = 25
 EPOCH_N_METRICS = 2
 BATCH_LOGGING_N = 100
 GRADIENT_CLIPPING = 0.5
+CHECKPOINT_FREQUENCY = 5
 
 ######################
 ## Model Parameters ##

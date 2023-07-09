@@ -61,13 +61,16 @@ class TransformerModel(nn.Module):
         positional_encoding="original",  # or "embedding"
     ):
         super(TransformerModel, self).__init__()
+
+        self.positional_encoding = positional_encoding
+
         self.src_embedding = nn.Embedding(src_size, d_model)
         self.tgt_embedding = nn.Embedding(tgt_size, d_model)
 
         if positional_encoding == "embedding":
             self.src_positional_encodding = nn.Embedding(src_size, d_model)
             self.tgt_positional_encoding = nn.Embedding(tgt_size, d_model)
-        elif "original":
+        elif positional_encoding == "original":
             self.src_positional_encodding = PositionalEncoding(d_model, dropout)
             self.tgt_positional_encoding = PositionalEncoding(d_model, dropout)
         else:
@@ -114,10 +117,16 @@ class TransformerModel(nn.Module):
         src_key_padding_mask = src == input_pad_token
 
         src_embedding = self.src_embedding(src)
-        src_pos_embedding = self.src_positional_encodding(src_embedding)
-        src = src_embedding + src_pos_embedding
         tgt_embedding = self.tgt_embedding(tgt)
-        tgt_pos_embedding = self.tgt_positional_encoding(tgt_embedding)
+
+        if self.positional_encoding == "original":
+            src_pos_embedding = self.src_positional_encodding(src_embedding)
+            tgt_pos_embedding = self.tgt_positional_encoding(tgt_embedding)
+        elif self.positional_encoding == "embedding":
+            src_pos_embedding = self.src_positional_encodding(src)
+            tgt_pos_embedding = self.tgt_positional_encoding(tgt)
+
+        src = src_embedding + src_pos_embedding
         tgt = tgt_embedding + tgt_pos_embedding
 
         output = self.transformer(

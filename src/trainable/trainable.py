@@ -8,23 +8,25 @@ from evaluation.evaluation import Evaluator
 import torch
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
+import random
 
 import os
+
 # import random
 
 import parameters as P
 
-class TrainTransformer(tune.Trainable):
 
+class TrainTransformer(tune.Trainable):
     # Sets up the model as an independent, parallelizable process
     def setup(self, config):
         # config (dict): A dict of hyperparameters
         self.gradient_clipping = config["gradient_clipping"]
 
         # # Set seeds for reproducibility
-        # torch.manual_seed(0)
-        # random.seed(0)
-        
+        torch.manual_seed(0)
+        random.seed(0)
+
         # Setup
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -37,13 +39,19 @@ class TrainTransformer(tune.Trainable):
         output_tokenizer = Tokenizer(P.OUTPUT_VOCABULARY)
 
         # Had to use absolute paths because of Ray (there must be a better way)
-        prefix = "/Users/lucgutm/Universidad/proyecto-deep-learning/"
+        prefix = "/home/domingo/deep-learning/proyecto-deep-learning/"
         if config["exp_type"] == "iid":
-            train_path = os.path.join(prefix, "SCAN/simple_split/tasks_test_simple.txt")
+            train_path = os.path.join(
+                prefix, "SCAN/simple_split/tasks_train_simple.txt"
+            )
             test_path = os.path.join(prefix, "SCAN/simple_split/tasks_test_simple.txt")
         elif config["exp_type"] == "ood":
-            train_path = os.path.join(prefix, "SCAN/add_prim_split/tasks_test_addprim_jump.txt")
-            test_path = os.path.join(prefix, "SCAN/add_prim_split/tasks_train_addprim_jump.txt")
+            train_path = os.path.join(
+                prefix, "SCAN/add_prim_split/tasks_train_addprim_jump.txt"
+            )
+            test_path = os.path.join(
+                prefix, "SCAN/add_prim_split/tasks_test_addprim_jump.txt"
+            )
         elif config["exp_type"] == "toy":
             train_path = os.path.join(prefix, "data/tasks_toy.txt")
             test_path = os.path.join(prefix, "data/tasks_toy.txt")
@@ -68,7 +76,6 @@ class TrainTransformer(tune.Trainable):
                 input_tokenizer.encode(input_preprocessor.transform(x)), device=device
             ),
             target_transform=lambda x: torch.tensor(
-                
                 output_tokenizer.encode(output_preprocesor.transform(x)), device=device
             ),
             label_transform=lambda x: torch.tensor(
@@ -98,6 +105,7 @@ class TrainTransformer(tune.Trainable):
 
         # Evaluation
         self.evaluation = Evaluator(output_tokenizer, 32)
+        self.final_evaluator = Evaluator(output_tokenizer, 1024)
 
         # Train
         self.model.train()
@@ -107,6 +115,8 @@ class TrainTransformer(tune.Trainable):
     def step(self):
         epoch_loss = 0
         for i, s_i in enumerate(self.train_dataset):
+            self.optimizer.zero_grad()
+
             x, y, y_label = s_i
 
             logits = self.model(x, y)
@@ -126,22 +136,24 @@ class TrainTransformer(tune.Trainable):
 
         # Save both train and test accuracy and loss on the final epoch (P.EPOCHS)
         if self.iteration == P.EPOCHS:
-            accuracy_train = self.evaluation.evaluate(self.model, self.train_dataset)
-            accuracy_test = self.evaluation.evaluate(self.model, self.test_dataset)
+            accuracy_train = self.final_evaluator.evaluate(
+                self.model, self.train_dataset
+            )
+            accuracy_test = self.final_evaluator.evaluate(self.model, self.test_dataset)
             metrics = {
                 "accuracy_train": accuracy_train,
                 "accuracy_test": accuracy_test,
                 "loss": epoch_loss,
             }
             return metrics
-        
+
         # Save train accuracy and loss every P.EPOCH_N_METRICS epochs
         if self.iteration % P.EPOCH_N_METRICS == 0:
             accuracy = self.evaluation.evaluate(self.model, self.train_dataset)
             # Log accuracy and loss on the training set
             metrics = {"accuracy": accuracy, "loss": epoch_loss}
             return metrics
-        
+
         # Save loss every epoch
         return {"loss": epoch_loss}
 
